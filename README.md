@@ -141,6 +141,55 @@ Fs  = int(d['fs_Hz'])
 
 ---
 
+### `biosenales/eeg_erp_kramer_1000trials.npz`
+
+EEG de cuero cabelludo registrado con un solo electrodo durante una tarea auditiva
+de dos condiciones. Mil ensayos por condición, 1 s por ensayo, fs = 500 Hz,
+estímulo presentado a t = 0.25 s. Amplitud en microvoltios.
+
+| Clave | Contenido |
+|---|---|
+| `EEGa` | condición A (tono agudo), matriz 1000 × 500 |
+| `EEGb` | condición B (tono grave), matriz 1000 × 500 |
+| `t` | vector temporal de 500 muestras, en segundos |
+| `fs_Hz` | 500 |
+| `t_estimulo_s` | 0.25 |
+| `unidades` | `'microvoltios'` |
+
+Convertido desde `02_EEG-1.mat`.
+
+Kramer, M. A., & Eden, U. T. *Case Studies in Neural Data Analysis: A Guide for the
+Practicing Neuroscientist.* MIT Press, 2016. Capítulo 2, The Event-Related Potential.
+
+Versión en Python: https://mark-kramer.github.io/Case-Studies-Python/02.html
+
+---
+
 ## Uso
 
 Los archivos pueden descargarse directamente desde su URL cruda:
+
+```
+https://raw.githubusercontent.com/MiguelSerranoReyes/datasets/main/biosenales/NOMBRE_DEL_ARCHIVO
+```
+
+Ejemplo en Python:
+
+```python
+import urllib.request, os
+
+URL = ('https://raw.githubusercontent.com/MiguelSerranoReyes/datasets/'
+       'main/biosenales/ecg_ambulatorio_60s.npz')
+ARCHIVO = 'ecg_ambulatorio_60s.npz'
+
+if not os.path.exists(ARCHIVO):
+    urllib.request.urlretrieve(URL, ARCHIVO)
+```
+
+---
+
+## Convención de nombres
+
+`tipoDeSeñal_sitioOCondición_duración.extensión`
+
+Ejemplos: `ppg_dedo_15s.csv`, `pcg_pulmonar_6s.wav`, `ecg_derivacion2_30s.csv`
