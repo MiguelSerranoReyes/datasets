@@ -16,6 +16,8 @@ Repositorio de datasets utilizados en mis cursos de la Facultad de Ingeniería, 
 | `biosenales/ecg_ambulatorio_60s.npz` | Electrocardiograma | 360 Hz | 60 s | 21 600 | NPZ | *(ver nota)* |
 | `biosenales/eeg_erp_kramer_1000trials.npz` | Electroencefalograma, 2 × 1 000 ensayos | 500 Hz | 1 s por ensayo | 500 por ensayo | NPZ | Kramer & Eden |
 | `biosenales/eeg_espectro_kramer_2s.npz` | Electroencefalograma, un canal | 1 000 Hz | 2 s | 2 000 | NPZ | Kramer & Eden |
+| `biosenales/ecog_cortical_1s.npz` | Electrocorticograma, un electrodo | 500 Hz | 1 s | 500 | NPZ | Kramer & Eden |
+| `biosenales/ecog_cortical_20s.npz` | Electrocorticograma, registro extendido | 500 Hz | 20 s | 10 000 | NPZ | Sintética |
 
 ### Qué metadatos conserva cada formato
 
@@ -235,6 +237,80 @@ Practicing Neuroscientist.* MIT Press, 2016. Capítulo 3, The Power Spectrum (Pa
 
 Versión en Python: https://mark-kramer.github.io/Case-Studies-Python/03.html
 
+---
+
+### `biosenales/ecog_cortical_1s.npz`
+
+Electrocorticograma registrado con un electrodo implantado directamente sobre la corteza,
+en una paciente con epilepsia bajo monitoreo invasivo. Un segundo a 500 Hz, en milivoltios.
+
+| Característica | Valor |
+|---|---|
+| Frecuencia de Nyquist | 250 Hz |
+| Resolución espectral | 1.0 Hz |
+| Ritmo dominante | 6.0 Hz |
+| Rango | −14.4 a +18.8 mV |
+
+Al durar un solo segundo, su resolución espectral es limitada y no admite promediado por
+segmentos. Es útil para estudiar fuga espectral y el efecto de las ventanas, no para
+métodos de estimación que requieren promediar.
+
+| Clave | Contenido |
+|---|---|
+| `ecog` | señal de 500 muestras, `float64` |
+| `t` | vector temporal, en segundos |
+| `fs_Hz` | 500 |
+| `unidades` | `'mV'` |
+| `n_muestras` | 500 |
+| `duracion_s` | 1.0 |
+| `descripcion` | cadena descriptiva |
+
+Convertido desde `04_ECoG-1.mat` sin modificar los datos; se verificó que los valores son
+idénticos al original.
+
+Kramer, M. A., & Eden, U. T. *Case Studies in Neural Data Analysis: A Guide for the
+Practicing Neuroscientist.* MIT Press, 2016. Capítulo 4, The Power Spectrum (Part 2).
+
+Versión en Python: https://mark-kramer.github.io/Case-Studies-Python/04.html
+
+---
+
+### `biosenales/ecog_cortical_20s.npz`
+
+**Señal generada, no registrada.** Veinte segundos a 500 Hz, en milivoltios, construida
+para docencia con la misma frecuencia de muestreo y escala de amplitud que el registro
+anterior.
+
+Se generó porque aquel dura un segundo, lo cual no permite ilustrar métodos de estimación
+espectral que requieren promediar varios segmentos.
+
+Composición:
+
+| Componente | Frecuencia | Descripción |
+|---|---|---|
+| Fondo | — | ruido con espectro $1/f^2$ |
+| Ritmo dominante | 6.3 Hz | banda estrecha, con amplitud modulada |
+| Componente débil | 12.4 Hz | banda estrecha, 22 dB por debajo del dominante |
+| Banda ancha | 21 Hz | ancho de banda de 4 Hz |
+
+Las frecuencias de los ritmos **no coinciden con los bins** de la DFT para las duraciones
+de segmento habituales, de modo que la fuga espectral resulta observable. El contenido por
+encima de 20 Hz representa el 12.4 % de la potencia total, frente al 13.9 % del registro
+real, y la pendiente del fondo entre 40 y 200 Hz es de −1.99.
+
+| Clave | Contenido |
+|---|---|
+| `ecog` | señal de 10 000 muestras, `float64` |
+| `t` | vector temporal, en segundos |
+| `fs_Hz` | 500 |
+| `unidades` | `'mV'` |
+| `n_muestras` | 10000 |
+| `duracion_s` | 20.0 |
+| `semilla` | 20261023 |
+| `componentes` | descripción de las componentes |
+| `descripcion` | cadena descriptiva |
+
+**Licencia:** libre uso con atribución.
 ---
 
 ## Uso
