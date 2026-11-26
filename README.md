@@ -18,6 +18,9 @@ Repositorio de datasets utilizados en mis cursos de la Facultad de Ingeniería, 
 | `biosenales/eeg_espectro_kramer_2s.npz` | Electroencefalograma, un canal | 1 000 Hz | 2 s | 2 000 | NPZ | Kramer & Eden |
 | `biosenales/ecog_cortical_1s.npz` | Electrocorticograma, un electrodo | 500 Hz | 1 s | 500 | NPZ | Kramer & Eden |
 | `biosenales/ecog_cortical_20s.npz` | Electrocorticograma, registro extendido | 500 Hz | 20 s | 10 000 | NPZ | Sintética |
+| `biosenales/ecog_dos_electrodos_100ensayos.npz` | Electrocorticograma, 2 electrodos × 100 ensayos | 500 Hz | 1 s por ensayo | 500 por ensayo | NPZ | Kramer & Eden |
+| `biosenales/emg_biceps_15s.npz` | Electromiografía de superficie | 1 000 Hz | 15 s | 15 000 | NPZ | Sintética |
+| `biosenales/eeg_erp_contaminado_10ensayos.npz` | Electroencefalograma, 10 ensayos con artefactos | 1 000 Hz | 1 s por ensayo | 1 000 por ensayo | NPZ | Kramer & Eden |
 
 ### Qué metadatos conserva cada formato
 
@@ -313,6 +316,139 @@ real, y la pendiente del fondo entre 40 y 200 Hz es de −1.99.
 **Licencia:** libre uso con atribución.
 ---
 
+### `biosenales/ecog_dos_electrodos_100ensayos.npz`
+
+Electrocorticograma registrado **simultáneamente con dos electrodos corticales** en una
+paciente bajo monitoreo invasivo, durante cien repeticiones de una misma tarea.
+Cien ensayos de un segundo, fs = 500 Hz, en milivoltios.
+
+Es el único archivo del repositorio con **dos señales registradas a la vez**, lo que
+permite estudiar la relación entre ellas y no solo sus propiedades individuales.
+
+Características relevantes para uso docente:
+
+| Característica | Valor |
+|---|---|
+| Ritmo dominante en ambos electrodos | 8.0 Hz |
+| Potencia en 8 Hz | 0.50 (la mayor del espectro) |
+| **Coherencia en 8 Hz** | **0.14** |
+| Potencia en 24 Hz | 0.00073, el 0.15 % de la de 8 Hz |
+| **Coherencia en 24 Hz** | **0.77** |
+
+Ese contraste es lo que hace valioso el registro: los dos electrodos oscilan con fuerza
+a la misma frecuencia **sin mantener una relación de fase consistente**, mientras que una
+componente mil veces más débil sí está acoplada. Medido sobre los cien ensayos, la
+longitud del vector resultante de las diferencias de fase es 0.137 en 8 Hz y 0.856 en 24 Hz.
+
+| Clave | Contenido |
+|---|---|
+| `E1` | electrodo 1, matriz 100 × 500, `float64` |
+| `E2` | electrodo 2, matriz 100 × 500, `float64` |
+| `t` | vector temporal de 500 muestras, en segundos |
+| `fs_Hz` | 500 |
+| `unidades` | `'mV'` |
+| `n_ensayos` | 100 |
+| `n_muestras` | 500 |
+| `duracion_s` | 1.0 |
+| `descripcion` | cadena descriptiva |
+
+Lectura:
+
+```python
+import numpy as np
+d  = np.load('ecog_dos_electrodos_100ensayos.npz')
+E1 = d['E1']              # (100, 500)
+E2 = d['E2']              # (100, 500)
+t  = d['t']               # (500,)
+Fs = int(d['fs_Hz'])      # 500
+```
+
+Convertido desde `ECoG-1.mat` sin modificar los datos; se verificó que los valores son
+idénticos al original.
+
+Kramer, M. A., & Eden, U. T. *Case Studies in Neural Data Analysis: A Guide for the
+Practicing Neuroscientist.* MIT Press, 2016. Capítulo 5, Coherence.
+
+Versión en Python: https://mark-kramer.github.io/Case-Studies-Python/05.html
+
+---
+
+### `biosenales/emg_biceps_15s.npz`
+
+Electromiografía de superficie del bíceps braquial. Quince segundos a 1 000 Hz,
+en milivoltios, con periodos de reposo y varias contracciones voluntarias de distinta
+intensidad.
+
+| Característica | Valor |
+|---|---|
+| Componente de directa | ≈ +0.043 mV |
+| Desviación en reposo | ≈ 0.130 mV |
+| Desviación en contracción | ≈ 0.418 mV |
+| Contracciones claras | 4.6–6.4 s, 7.5–9.5 s, 12.6–14.0 s |
+| Contracción débil | ≈ 11 s |
+
+Reparto de la potencia: 3.6 % por debajo de 20 Hz, 24.5 % entre 20 y 150 Hz —la banda
+asociada a la actividad muscular— y 72.0 % por encima de 150 Hz.
+
+La contracción débil de los 11 segundos es útil para discutir la elección de un umbral
+de detección: con un umbral bajo se detecta pero otras contracciones se fragmentan, y
+con uno alto desaparece. No existe un valor que acierte en todos los casos.
+
+| Clave | Contenido |
+|---|---|
+| `emg` | señal de 15 000 muestras, `float64` |
+| `t` | vector temporal, en segundos |
+| `fs_Hz` | 1000 |
+| `unidades` | `'mV'` |
+| `n_muestras` | 15000 |
+| `duracion_s` | 15.0 |
+| `descripcion` | cadena descriptiva |
+
+**Licencia:** libre uso con atribución.
+
+---
+
+### `biosenales/eeg_erp_contaminado_10ensayos.npz`
+
+Diez ensayos de EEG de un segundo cada uno, muestreados a 1 000 Hz, registrados durante
+una tarea con estímulo repetido. En milivoltios.
+
+El registro contiene un potencial evocado que **no es visible directamente**: queda
+enmascarado por dos contaminaciones de naturaleza distinta.
+
+| Característica | Valor |
+|---|---|
+| Interferencia de línea | 60.00 Hz, **86.8 %** de la potencia total |
+| Artefacto transitorio | uno por ensayo, en instantes variables, de 7 a 9 mV |
+| Banda fisiológica (5–30 Hz) | 1.5 % de la potencia |
+| Potencial evocado | ≈ +0.32 mV alrededor de t = 0.51 s, visible tras filtrar |
+
+Las dos contaminaciones piden estrategias opuestas: la interferencia ocupa una banda
+propia y se puede filtrar, mientras que los artefactos transitorios no la tienen y
+filtrarlos solo los esparce en el tiempo. Como ocurren en instantes distintos en cada
+ensayo, el promediado los atenúa.
+
+| Clave | Contenido |
+|---|---|
+| `eeg` | matriz de 10 × 1000, `float64` |
+| `t` | vector temporal, en segundos |
+| `fs_Hz` | 1000 |
+| `unidades` | `'mV'` |
+| `n_ensayos` | 10 |
+| `n_muestras` | 1000 |
+| `duracion_s` | 1.0 |
+| `descripcion` | cadena descriptiva |
+
+Convertido desde `EEG-1.mat` sin modificar los datos; se verificó que los valores son
+idénticos al original.
+
+Kramer, M. A., & Eden, U. T. *Case Studies in Neural Data Analysis: A Guide for the
+Practicing Neuroscientist.* MIT Press, 2016. Capítulo 6, Filtering Field Data.
+
+Versión en Python: https://mark-kramer.github.io/Case-Studies-Python/06.html
+
+---
+
 ## Uso
 
 Los archivos pueden descargarse directamente desde su URL cruda:
@@ -342,3 +478,7 @@ if not os.path.exists(ARCHIVO):
 
 Ejemplos: `ppg_dedo_15s.csv`, `pcg_pulmonar_6s.wav`, `ecg_derivacion2_30s.csv`,
 `eeg_espectro_kramer_2s.npz`
+
+Cuando el archivo contiene **matrices de ensayos** en lugar de una señal continua, el
+último campo indica el número de ensayos en vez de la duración total:
+`eeg_erp_contaminado_10ensayos.npz`, `ecog_dos_electrodos_100ensayos.npz`.
